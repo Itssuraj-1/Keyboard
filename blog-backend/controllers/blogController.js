@@ -7,7 +7,7 @@ import {
 } from "../utils/cloudinary.js";
 import fs from "fs";
 
-// @desc    Get all blogs (with pagination and search)
+// @desc    Get all blogs (with pagination and search) - only published
 // @route   GET /api/blogs
 // @access  Public
 export const getBlogs = async (req, res, next) => {
@@ -19,8 +19,11 @@ export const getBlogs = async (req, res, next) => {
     const sortBy = req.query.sortBy || "createdAt";
     const order = req.query.order === "asc" ? 1 : -1;
 
-    // Build query
-    const query = search ? { $text: { $search: search } } : {};
+    // Build query - only show published blogs
+    let query = { status: "published" };
+    if (search) {
+      query.$text = { $search: search };
+    }
 
     // Get total count
     const total = await Blog.countDocuments(query);
@@ -75,7 +78,7 @@ export const getBlogById = async (req, res, next) => {
 // @access  Private
 export const createBlog = async (req, res, next) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, status } = req.body;
 
     // Validate required fields
     if (!title || !content) {
@@ -93,12 +96,13 @@ export const createBlog = async (req, res, next) => {
     // Delete local file after upload
     fs.unlinkSync(req.file.path);
 
-    // Create blog
+    // Create blog with status (default to published if not provided)
     const blog = await Blog.create({
       title,
       content,
       coverImage: uploadResult.url,
       author: req.user._id,
+      status: status || "published",
     });
 
     // Populate author details
@@ -130,7 +134,7 @@ export const updateBlog = async (req, res, next) => {
       return ApiResponse.error(res, 403, "Not authorized to update this blog");
     }
 
-    const { title, content } = req.body;
+    const { title, content, status } = req.body;
     let coverImageUrl = blog.coverImage;
 
     // If new image uploaded, upload to Cloudinary
@@ -158,6 +162,7 @@ export const updateBlog = async (req, res, next) => {
     blog.title = title || blog.title;
     blog.content = content || blog.content;
     blog.coverImage = coverImageUrl;
+    blog.status = status || blog.status;
 
     const updatedBlog = await blog.save();
     await updatedBlog.populate("author", "name email avatar");
@@ -213,7 +218,7 @@ export const deleteBlog = async (req, res, next) => {
   }
 };
 
-// @desc    Get blogs by specific user
+// @desc    Get blogs by specific user - only published
 // @route   GET /api/blogs/user/:userId
 // @access  Public
 export const getBlogsByUser = async (req, res, next) => {
@@ -222,9 +227,15 @@ export const getBlogsByUser = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const total = await Blog.countDocuments({ author: req.params.userId });
+    // Only show published blogs for public view
+    const query = {
+      author: req.params.userId,
+      status: "published",
+    };
 
-    const blogs = await Blog.find({ author: req.params.userId })
+    const total = await Blog.countDocuments(query);
+
+    const blogs = await Blog.find(query)
       .populate("author", "name email avatar")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -245,8 +256,9 @@ export const getBlogsByUser = async (req, res, next) => {
   }
 };
 
-
-// Add new function to get user's own blogs
+// @desc    Get user's own blogs (including drafts)
+// @route   GET /api/blogs/my-blogs
+// @access  Private
 export const getMyBlogs = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;

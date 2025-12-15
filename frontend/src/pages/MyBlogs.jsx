@@ -3,7 +3,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { blogsAPI } from "../api/blogs";
 import DashboardLayout from "../components/layout/DashboardLayout";
-import { Heart, MessageCircle, Edit, Trash2, Eye } from "lucide-react";
+import {
+  Heart,
+  MessageCircle,
+  Edit,
+  Trash2,
+  Eye,
+  MoreVertical,
+  Upload,
+} from "lucide-react";
 import Button from "../components/common/Button";
 import Card from "../components/common/Card";
 import LoadingSpinner from "../components/common/LoadingSpinner";
@@ -19,6 +27,9 @@ const MyBlogs = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  // three-dot menu control
+  const [openMenuId, setOpenMenuId] = useState(null);
 
   useEffect(() => {
     fetchMyBlogs();
@@ -43,6 +54,7 @@ const MyBlogs = () => {
         blogsAPI.getMyBlogs({ status: "published", limit: 1 }),
         blogsAPI.getMyBlogs({ status: "draft", limit: 1 }),
       ]);
+
       setCounts({
         published: publishedRes.data.pagination.total,
         draft: draftRes.data.pagination.total,
@@ -54,23 +66,32 @@ const MyBlogs = () => {
 
   const handleEdit = (blogId) => {
     navigate(`/edit/${blogId}`);
+    setOpenMenuId(null);
   };
 
   const handleView = (blogId) => {
     navigate(`/blog/${blogId}`);
+    setOpenMenuId(null);
+  };
+
+  const handlePublish = (blogId) => {
+    // TODO: hook publish API later
+    console.log("Publish blog:", blogId);
+    setOpenMenuId(null);
   };
 
   const handleDeleteClick = (blog) => {
     setBlogToDelete(blog);
     setShowDeleteModal(true);
+    setOpenMenuId(null);
   };
 
   const handleDeleteConfirm = async () => {
     try {
       setDeleting(true);
       await blogsAPI.deleteBlog(blogToDelete._id);
-      setBlogs(blogs.filter((b) => b._id !== blogToDelete._id));
-      fetchCounts(); // Update counts
+      setBlogs((prev) => prev.filter((b) => b._id !== blogToDelete._id));
+      fetchCounts();
     } catch (err) {
       alert(err.response?.data?.message || "Failed to delete blog");
     } finally {
@@ -102,20 +123,20 @@ const MyBlogs = () => {
             <nav className="flex space-x-8 px-6">
               <button
                 onClick={() => setActiveTab("published")}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === "published"
                     ? "border-black text-black"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
                 Published ({counts.published})
               </button>
               <button
                 onClick={() => setActiveTab("draft")}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === "draft"
                     ? "border-black text-black"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
                 Drafts ({counts.draft})
@@ -180,34 +201,58 @@ const MyBlogs = () => {
                         </div>
                       </div>
 
-                      {/* Actions */}
-                      <div className="flex flex-col gap-2">
-                        {activeTab === "published" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleView(blog._id)}
-                          >
-                            <Eye size={16} className="mr-1" />
-                            View
-                          </Button>
+                      {/* Actions (three-dot menu only change) */}
+                      <div className="relative">
+                        <button
+                          onClick={() =>
+                            setOpenMenuId(
+                              openMenuId === blog._id ? null : blog._id
+                            )
+                          }
+                          className="p-2 rounded-full hover:bg-gray-100"
+                        >
+                          <MoreVertical size={18} />
+                        </button>
+
+                        {openMenuId === blog._id && (
+                          <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-md z-10">
+                            {activeTab === "published" && (
+                              <button
+                                onClick={() => handleView(blog._id)}
+                                className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
+                              >
+                                <Eye size={14} className="mr-2" />
+                                View
+                              </button>
+                            )}
+
+                            {activeTab === "draft" && (
+                              <button
+                                onClick={() => handlePublish(blog._id)}
+                                className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
+                              >
+                                <Upload size={14} className="mr-2" />
+                                Publish
+                              </button>
+                            )}
+
+                            <button
+                              onClick={() => handleEdit(blog._id)}
+                              className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
+                            >
+                              <Edit size={14} className="mr-2" />
+                              Edit
+                            </button>
+
+                            <button
+                              onClick={() => handleDeleteClick(blog)}
+                              className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 size={14} className="mr-2" />
+                              Delete
+                            </button>
+                          </div>
                         )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(blog._id)}
-                        >
-                          <Edit size={16} className="mr-1" />
-                          Edit
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleDeleteClick(blog)}
-                        >
-                          <Trash2 size={16} className="mr-1" />
-                          Delete
-                        </Button>
                       </div>
                     </div>
                   </div>
@@ -218,7 +263,7 @@ const MyBlogs = () => {
         </Card>
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       <Modal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}

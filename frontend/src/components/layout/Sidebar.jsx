@@ -1,6 +1,13 @@
 // frontend/src/components/layout/Sidebar.jsx
 import { useState, useRef, useEffect } from "react";
-import { Home, PenSquare, FileText, BarChart3, User } from "lucide-react";
+import {
+  Home,
+  PenSquare,
+  FileText,
+  BarChart3,
+  User,
+  LogOut,
+} from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 

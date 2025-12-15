@@ -4,10 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { blogsAPI } from "../../api/blogs";
 import Input from "../common/Input";
 import Button from "../common/Button";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Save, Send } from "lucide-react";
 
 /**
- * Blog create/edit form component
+ * Blog create/edit form component with draft/publish options
  */
 const BlogForm = ({ blogId = null, initialData = null }) => {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
   const [status, setStatus] = useState(initialData?.status || "published");
-  
+
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -29,6 +29,7 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
         content: initialData.content,
       });
       setPreviewUrl(initialData.coverImage);
+      setStatus(initialData.status);
     }
   }, [initialData]);
 
@@ -80,31 +81,35 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
     setPreviewUrl(initialData?.coverImage || "");
   };
 
-  const validate = () => {
+  const validate = (isDraft = false) => {
     const newErrors = {};
 
+    // For drafts, only require title
     if (!formData.title || formData.title.trim().length < 5) {
       newErrors.title = "Title must be at least 5 characters";
     } else if (formData.title.trim().length > 200) {
       newErrors.title = "Title cannot exceed 200 characters";
     }
 
-    if (!formData.content || formData.content.trim().length < 20) {
-      newErrors.content = "Content must be at least 20 characters";
-    }
+    // For publish, require content
+    if (!isDraft) {
+      if (!formData.content || formData.content.trim().length < 20) {
+        newErrors.content = "Content must be at least 20 characters";
+      }
 
-    if (!blogId && !coverImage) {
-      newErrors.coverImage = "Please upload a cover image";
+      if (!blogId && !coverImage) {
+        newErrors.coverImage = "Please upload a cover image";
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (publishStatus) => {
+    const isDraft = publishStatus === "draft";
 
-    if (!validate()) return;
+    if (!validate(isDraft)) return;
 
     setLoading(true);
 
@@ -112,6 +117,7 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
       const formDataToSend = new FormData();
       formDataToSend.append("title", formData.title.trim());
       formDataToSend.append("content", formData.content.trim());
+      formDataToSend.append("status", publishStatus);
 
       if (coverImage) {
         formDataToSend.append("coverImage", coverImage);
@@ -124,7 +130,12 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
         response = await blogsAPI.createBlog(formDataToSend);
       }
 
-      navigate(`/blog/${response.data._id}`);
+      // Redirect based on status
+      if (publishStatus === "draft") {
+        navigate("/my-blogs");
+      } else {
+        navigate(`/blog/${response.data._id}`);
+      }
     } catch (err) {
       setApiError(err.response?.data?.message || "Failed to save blog");
     } finally {
@@ -133,10 +144,26 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form className="space-y-6">
       {apiError && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
           {apiError}
+        </div>
+      )}
+
+      {/* Status Badge */}
+      {blogId && (
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-600">Current Status:</span>
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium ${
+              status === "published"
+                ? "bg-green-100 text-green-800"
+                : "bg-yellow-100 text-yellow-800"
+            }`}
+          >
+            {status === "published" ? "Published" : "Draft"}
+          </span>
         </div>
       )}
 
@@ -220,13 +247,36 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-end space-x-3">
+      <div className="flex justify-between items-center pt-4 border-t">
         <Button type="button" variant="outline" onClick={() => navigate(-1)}>
           Cancel
         </Button>
-        <Button type="submit" variant="primary" loading={loading}>
-          {blogId ? "Update Blog" : "Publish Blog"}
-        </Button>
+
+        <div className="flex space-x-3">
+          {/* Save as Draft Button */}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handleSubmit("draft")}
+            loading={loading}
+            disabled={loading}
+          >
+            <Save size={18} className="mr-2" />
+            Save as Draft
+          </Button>
+
+          {/* Publish Button */}
+          <Button
+            type="button"
+            variant="primary"
+            onClick={() => handleSubmit("published")}
+            loading={loading}
+            disabled={loading}
+          >
+            <Send size={18} className="mr-2" />
+            {blogId && status === "published" ? "Update" : "Publish"}
+          </Button>
+        </div>
       </div>
     </form>
   );
