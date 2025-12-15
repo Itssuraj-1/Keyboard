@@ -1,10 +1,10 @@
 // frontend/src/api/blogs.js
-import api from './axios';
+import api from "./axios";
 
 export const blogsAPI = {
   // Get all blogs with pagination and search
   getBlogs: async (params = {}) => {
-    const response = await api.get('/blogs', { params });
+    const response = await api.get("/blogs", { params });
     return response.data;
   },
 
@@ -16,9 +16,9 @@ export const blogsAPI = {
 
   // Create new blog
   createBlog: async (formData) => {
-    const response = await api.post('/blogs', formData, {
+    const response = await api.post("/blogs", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
@@ -28,7 +28,7 @@ export const blogsAPI = {
   updateBlog: async (id, formData) => {
     const response = await api.put(`/blogs/${id}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
@@ -79,6 +79,11 @@ export const blogsAPI = {
   // Delete comment
   deleteComment: async (commentId) => {
     const response = await api.delete(`/blogs/comments/${commentId}`);
+    return response.data;
+  },
+
+  getMyBlogs: async (params = {}) => {
+    const response = await api.get("/blogs/my-blogs", { params });
     return response.data;
   },
 };

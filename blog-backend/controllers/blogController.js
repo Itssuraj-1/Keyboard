@@ -244,3 +244,40 @@ export const getBlogsByUser = async (req, res, next) => {
     next(error);
   }
 };
+
+
+// Add new function to get user's own blogs
+export const getMyBlogs = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const status = req.query.status; // 'draft' or 'published'
+
+    const query = { author: req.user._id };
+    if (status) {
+      query.status = status;
+    }
+
+    const total = await Blog.countDocuments(query);
+
+    const blogs = await Blog.find(query)
+      .populate("author", "name email avatar")
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    return ApiResponse.success(res, 200, "My blogs retrieved successfully", {
+      blogs,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

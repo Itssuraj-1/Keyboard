@@ -6,6 +6,7 @@ import {
   updateBlog,
   deleteBlog,
   getBlogsByUser,
+  getMyBlogs,
 } from "../controllers/blogController.js";
 import { toggleLike, getLikeStatus } from "../controllers/likeController.js";
 import {
@@ -26,6 +27,7 @@ router.get("/:id", getBlogById);
 router.post("/", protect, upload.single("coverImage"), createBlog);
 router.put("/:id", protect, upload.single("coverImage"), updateBlog);
 router.delete("/:id", protect, deleteBlog);
+router.get("/my-blogs", protect, getMyBlogs);
 
 // Like routes
 router.post("/:id/like", protect, toggleLike);
