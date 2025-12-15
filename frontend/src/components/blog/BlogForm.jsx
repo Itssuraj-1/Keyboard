@@ -20,7 +20,8 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
-
+  const [status, setStatus] = useState(initialData?.status || "published");
+  
   useEffect(() => {
     if (initialData) {
       setFormData({
