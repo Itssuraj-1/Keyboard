@@ -94,7 +94,7 @@ const LoginForm = () => {
               placeholder="Email"
               className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border ${
                 errors.email ? "border-red-300" : "border-gray-200"
-              } rounded-full focus:outline-none focus:border-cyan-400 focus:bg-white transition-all`}
+              } rounded-full focus:outline-none focus:border-black focus:bg-white transition-all text-black placeholder-gray-400`}
             />
             {errors.email && (
               <p className="text-red-500 text-xs mt-1.5 ml-4">{errors.email}</p>
@@ -114,10 +114,12 @@ const LoginForm = () => {
               placeholder="Password"
               className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border ${
                 errors.password ? "border-red-300" : "border-gray-200"
-              } rounded-full focus:outline-none focus:border-cyan-400 focus:bg-white transition-all`}
+              } rounded-full focus:outline-none focus:border-black focus:bg-white transition-all text-black placeholder-gray-400`}
             />
             {errors.password && (
-              <p className="text-red-500 text-xs mt-1.5 ml-4">{errors.password}</p>
+              <p className="text-red-500 text-xs mt-1.5 ml-4">
+                {errors.password}
+              </p>
             )}
           </div>
 
@@ -126,11 +128,11 @@ const LoginForm = () => {
             <input
               type="checkbox"
               id="terms"
-              className="w-4 h-4 rounded border-gray-300 text-cyan-500 focus:ring-cyan-400"
+              className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black"
             />
             <label htmlFor="terms" className="text-sm text-gray-600">
               I agree to the{" "}
-              <span className="text-cyan-500 hover:underline cursor-pointer">
+              <span className="text-black hover:underline cursor-pointer">
                 terms and conditions
               </span>
             </label>
@@ -140,7 +142,7 @@ const LoginForm = () => {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full bg-linear-to-r from-cyan-400 to-blue-600 text-white font-semibold py-3.5 rounded-full hover:shadow-lg transform hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-black text-white font-semibold py-3.5 rounded-full hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
@@ -162,7 +164,7 @@ const LoginForm = () => {
               <button
                 type="button"
                 onClick={() => navigate("/register")}
-                className="text-cyan-500 font-semibold hover:underline"
+                className="text-black font-semibold hover:underline"
               >
                 Sign Up
               </button>
