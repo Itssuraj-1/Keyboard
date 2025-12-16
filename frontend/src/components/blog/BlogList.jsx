@@ -62,14 +62,13 @@ const BlogList = ({ searchQuery = "" }) => {
 
       {/* Search Results Info */}
       {searchQuery && (
-        <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-md">
+        <div className="bg-gray-50 border-2 border-gray-900 text-gray-900 px-5 py-3 rounded-lg font-medium">
           <p>
             {pagination.total === 0 ? (
-              <>No results found for "{searchQuery}"</>
+              <>No results found for <span className="font-bold">"{searchQuery}"</span></>
             ) : (
               <>
-                Found {pagination.total} result
-                {pagination.total !== 1 ? "s" : ""} for "{searchQuery}"
+                Found <span className="font-bold">{pagination.total}</span> result{pagination.total !== 1 ? "s" : ""} for <span className="font-bold">"{searchQuery}"</span>
               </>
             )}
           </p>

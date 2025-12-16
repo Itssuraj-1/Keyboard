@@ -182,12 +182,11 @@ const BlogDetail = () => {
         </div>
       </div>
 
-      {/* Blog Content */}
-      <div className="prose max-w-none mb-12">
-        <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
-          {blog.content}
-        </p>
-      </div>
+      {/* Blog Content - Render HTML */}
+      <div
+        className="prose prose-lg max-w-none mb-12 prose-headings:text-gray-900 prose-p:text-gray-800 prose-a:text-black prose-strong:text-gray-900 prose-code:text-gray-900 prose-pre:bg-gray-100 prose-blockquote:border-gray-900"
+        dangerouslySetInnerHTML={{ __html: blog.content }}
+      />
 
       {/* Comments Section */}
       <CommentSection blogId={id} />

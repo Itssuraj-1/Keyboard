@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { blogsAPI } from "../../api/blogs";
 import Input from "../common/Input";
 import Button from "../common/Button";
+import RichTextEditor from "../common/RichTextEditor";
 import { Upload, X, Save, Send } from "lucide-react";
 
 /**
@@ -38,6 +39,14 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+    setApiError("");
+  };
+
+  const handleContentChange = (content) => {
+    setFormData((prev) => ({ ...prev, content }));
+    if (errors.content) {
+      setErrors((prev) => ({ ...prev, content: "" }));
     }
     setApiError("");
   };
@@ -93,7 +102,9 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
 
     // For publish, require content
     if (!isDraft) {
-      if (!formData.content || formData.content.trim().length < 20) {
+      // Strip HTML tags for length validation
+      const textContent = formData.content.replace(/<[^>]*>/g, '').trim();
+      if (!textContent || textContent.length < 20) {
         newErrors.content = "Content must be at least 20 characters";
       }
 
@@ -116,7 +127,7 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("title", formData.title.trim());
-      formDataToSend.append("content", formData.content.trim());
+      formDataToSend.append("content", formData.content);
       formDataToSend.append("status", publishStatus);
 
       if (coverImage) {
@@ -226,20 +237,15 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
         )}
       </div>
 
-      {/* Content */}
+      {/* Rich Text Editor */}
       <div>
         <label className="block text-sm font-medium text-gray-900 mb-2">
           Content <span className="text-red-500">*</span>
         </label>
-        <textarea
-          name="content"
-          value={formData.content}
-          onChange={handleChange}
+        <RichTextEditor
+          content={formData.content}
+          onChange={handleContentChange}
           placeholder="Write your blog content here..."
-          rows="12"
-          className={`w-full px-4 py-2 border ${
-            errors.content ? "border-red-500" : "border-gray-300"
-          } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent`}
         />
         {errors.content && (
           <p className="mt-1 text-sm text-red-500">{errors.content}</p>
