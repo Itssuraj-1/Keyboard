@@ -139,9 +139,18 @@ const MyBlogs = () => {
     }
   };
 
-  const truncateContent = (text, maxLength = 100) => {
-    if (text.length <= maxLength) return text;
-    return text.slice(0, maxLength) + "...";
+  // Strip HTML tags and truncate content
+  const truncateContent = (htmlContent, maxLength = 100) => {
+    // Create a temporary div to parse HTML
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = htmlContent;
+    
+    // Get text content without HTML tags
+    const textContent = tempDiv.textContent || tempDiv.innerText || "";
+    
+    // Truncate to maxLength
+    if (textContent.length <= maxLength) return textContent;
+    return textContent.slice(0, maxLength) + "...";
   };
 
   return (

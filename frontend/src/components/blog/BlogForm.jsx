@@ -88,13 +88,16 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
 
   const removeImage = () => {
     setCoverImage(null);
-    setPreviewUrl(initialData?.coverImage || "");
+    setPreviewUrl("");
+    // Clear the file input
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) fileInput.value = '';
   };
 
   const validateStep1 = () => {
     const newErrors = {};
     const textContent = formData.content.replace(/<[^>]*>/g, "").trim();
-
+    
     if (!textContent || textContent.length < 20) {
       newErrors.content = "Content must be at least 20 characters";
     }
@@ -131,9 +134,7 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
     // Allow saving draft from step 1 with minimal validation
     const textContent = formData.content.replace(/<[^>]*>/g, "").trim();
     if (!textContent || textContent.length < 20) {
-      setErrors({
-        content: "Please write at least 20 characters before saving",
-      });
+      setErrors({ content: "Please write at least 20 characters before saving" });
       return;
     }
 
@@ -150,25 +151,19 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
       } else if (!blogId) {
         // Create a temporary placeholder image for new drafts
         // We'll use a data URL as a workaround
-        const canvas = document.createElement("canvas");
+        const canvas = document.createElement('canvas');
         canvas.width = 1200;
         canvas.height = 630;
-        const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#f3f4f6";
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#f3f4f6';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#9ca3af";
-        ctx.font = "48px Inter";
-        ctx.textAlign = "center";
-        ctx.fillText(
-          "Draft - Add Cover Later",
-          canvas.width / 2,
-          canvas.height / 2
-        );
-
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '48px Inter';
+        ctx.textAlign = 'center';
+        ctx.fillText('Draft - Add Cover Later', canvas.width / 2, canvas.height / 2);
+        
         // Convert canvas to blob
-        const blob = await new Promise((resolve) =>
-          canvas.toBlob(resolve, "image/jpeg")
-        );
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
         formDataToSend.append("coverImage", blob, "draft-placeholder.jpg");
       }
 
@@ -220,31 +215,19 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
       {/* Step Indicator */}
       <div className="mb-8">
         <div className="flex items-center justify-center space-x-4">
-          <div
-            className={`flex items-center ${
-              step === 1 ? "text-black" : "text-gray-400"
-            }`}
-          >
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
-                step === 1 ? "bg-black text-white" : "bg-gray-200"
-              }`}
-            >
+          <div className={`flex items-center ${step === 1 ? "text-black" : "text-gray-400"}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
+              step === 1 ? "bg-black text-white" : "bg-gray-200"
+            }`}>
               1
             </div>
             <span className="ml-2 font-medium">Write</span>
           </div>
           <div className="w-16 h-0.5 bg-gray-300"></div>
-          <div
-            className={`flex items-center ${
-              step === 2 ? "text-black" : "text-gray-400"
-            }`}
-          >
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
-                step === 2 ? "bg-black text-white" : "bg-gray-200"
-              }`}
-            >
+          <div className={`flex items-center ${step === 2 ? "text-black" : "text-gray-400"}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
+              step === 2 ? "bg-black text-white" : "bg-gray-200"
+            }`}>
               2
             </div>
             <span className="ml-2 font-medium">Details</span>
@@ -265,14 +248,12 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
           <div className="shrink-0 border-b border-gray-100 px-12 py-4">
             <div className="max-w-5xl mx-auto flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Start Writing
-                </h2>
+                <h2 className="text-2xl font-bold text-gray-900">Start Writing</h2>
                 <p className="text-sm text-gray-500 mt-0.5">
                   Focus on your content. Add title and cover image next.
                 </p>
               </div>
-
+              
               {/* Compact Action Buttons with Better Styling */}
               <div className="flex items-center space-x-3">
                 <Button
@@ -283,9 +264,9 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
                 >
                   Cancel
                 </Button>
-
+                
                 <div className="h-6 w-px bg-gray-300"></div>
-
+                
                 <Button
                   type="button"
                   variant="outline"
@@ -297,7 +278,7 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
                   <Save size={16} className="mr-2" />
                   Save Draft
                 </Button>
-
+                
                 <Button
                   type="button"
                   variant="primary"
@@ -384,13 +365,20 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
                 <button
                   type="button"
                   onClick={removeImage}
-                  className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100"
+                  className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors"
                 >
                   <X size={20} />
                 </button>
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('coverImageInput').click()}
+                  className="absolute bottom-2 right-2 bg-black text-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-800 transition-colors text-sm font-medium"
+                >
+                  Change Image
+                </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
+              <label htmlFor="coverImageInput" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload size={40} className="text-gray-400 mb-3" />
                   <p className="mb-2 text-sm text-gray-500">
@@ -401,14 +389,15 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
                     PNG, JPG, GIF, WEBP (MAX. 5MB)
                   </p>
                 </div>
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
               </label>
             )}
+            <input
+              id="coverImageInput"
+              type="file"
+              className="hidden"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
             {errors.coverImage && (
               <p className="mt-1 text-sm text-red-500">{errors.coverImage}</p>
             )}
@@ -416,7 +405,11 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
 
           {/* Action Buttons */}
           <div className="flex justify-between items-center pt-6 border-t">
-            <Button type="button" variant="outline" onClick={() => setStep(1)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setStep(1)}
+            >
               <ArrowLeft size={18} className="mr-2" />
               Back to Writing
             </Button>
