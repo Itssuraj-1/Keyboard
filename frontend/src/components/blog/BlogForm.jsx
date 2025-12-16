@@ -32,7 +32,6 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
       });
       setPreviewUrl(initialData.coverImage);
       setStatus(initialData.status);
-      // When editing, start at step 1 (editor) so user can edit content
       setStep(1);
     }
   }, [initialData]);
@@ -89,7 +88,6 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
   const removeImage = () => {
     setCoverImage(null);
     setPreviewUrl("");
-    // Clear the file input
     const fileInput = document.querySelector('input[type="file"]');
     if (fileInput) fileInput.value = '';
   };
@@ -131,7 +129,6 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
   };
 
   const handleSaveDraft = async () => {
-    // Allow saving draft from step 1 with minimal validation
     const textContent = formData.content.replace(/<[^>]*>/g, "").trim();
     if (!textContent || textContent.length < 20) {
       setErrors({ content: "Please write at least 20 characters before saving" });
@@ -145,12 +142,9 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
       formDataToSend.append("content", formData.content);
       formDataToSend.append("status", "draft");
 
-      // For drafts, we need a placeholder image if none exists
       if (coverImage) {
         formDataToSend.append("coverImage", coverImage);
       } else if (!blogId) {
-        // Create a temporary placeholder image for new drafts
-        // We'll use a data URL as a workaround
         const canvas = document.createElement('canvas');
         canvas.width = 1200;
         canvas.height = 630;
@@ -162,7 +156,6 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
         ctx.textAlign = 'center';
         ctx.fillText('Draft - Add Cover Later', canvas.width / 2, canvas.height / 2);
         
-        // Convert canvas to blob
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
         formDataToSend.append("coverImage", blob, "draft-placeholder.jpg");
       }
@@ -213,59 +206,59 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
   return (
     <div>
       {/* Step Indicator */}
-      <div className="mb-8">
-        <div className="flex items-center justify-center space-x-4">
+      <div className="mb-6 sm:mb-8">
+        <div className="flex items-center justify-center space-x-3 sm:space-x-4">
           <div className={`flex items-center ${step === 1 ? "text-black" : "text-gray-400"}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
+            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-semibold text-sm sm:text-base ${
               step === 1 ? "bg-black text-white" : "bg-gray-200"
             }`}>
               1
             </div>
-            <span className="ml-2 font-medium">Write</span>
+            <span className="ml-1.5 sm:ml-2 font-medium text-sm sm:text-base">Write</span>
           </div>
-          <div className="w-16 h-0.5 bg-gray-300"></div>
+          <div className="w-12 sm:w-16 h-0.5 bg-gray-300"></div>
           <div className={`flex items-center ${step === 2 ? "text-black" : "text-gray-400"}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
+            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-semibold text-sm sm:text-base ${
               step === 2 ? "bg-black text-white" : "bg-gray-200"
             }`}>
               2
             </div>
-            <span className="ml-2 font-medium">Details</span>
+            <span className="ml-1.5 sm:ml-2 font-medium text-sm sm:text-base">Details</span>
           </div>
         </div>
       </div>
 
       {apiError && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-6">
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-6 text-sm">
           {apiError}
         </div>
       )}
 
-      {/* STEP 1: Write Content - Full Screen Experience */}
+      {/* STEP 1: Write Content - Full Screen on All Devices */}
       {step === 1 && (
-        <div className="fixed inset-0 top-16 left-64 bg-white z-10 flex flex-col">
+        <div className="fixed inset-0 top-16 left-0 lg:left-64 bg-white z-10 flex flex-col">
           {/* Minimal Header */}
-          <div className="shrink-0 border-b border-gray-100 px-12 py-4">
-            <div className="max-w-5xl mx-auto flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">Start Writing</h2>
-                <p className="text-sm text-gray-500 mt-0.5">
+          <div className="shrink-0 border-b border-gray-100 px-4 sm:px-8 lg:px-12 py-3 sm:py-4">
+            <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="text-center sm:text-left">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Start Writing</h2>
+                <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
                   Focus on your content. Add title and cover image next.
                 </p>
               </div>
               
-              {/* Compact Action Buttons with Better Styling */}
-              <div className="flex items-center space-x-3">
+              {/* Compact Action Buttons */}
+              <div className="flex items-center justify-between sm:justify-end gap-2 sm:space-x-3">
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => navigate(-1)}
-                  className="text-gray-600 hover:text-gray-900"
+                  className="text-gray-600 hover:text-gray-900 text-sm"
                 >
                   Cancel
                 </Button>
                 
-                <div className="h-6 w-px bg-gray-300"></div>
+                <div className="hidden sm:block h-6 w-px bg-gray-300"></div>
                 
                 <Button
                   type="button"
@@ -273,27 +266,27 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
                   onClick={handleSaveDraft}
                   loading={loading}
                   disabled={loading}
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50 text-sm"
                 >
-                  <Save size={16} className="mr-2" />
-                  Save Draft
+                  <Save size={14} className="sm:mr-2" />
+                  <span className="hidden sm:inline">Save Draft</span>
                 </Button>
                 
                 <Button
                   type="button"
                   variant="primary"
                   onClick={handleNext}
-                  className="bg-black hover:bg-gray-800 shadow-sm"
+                  className="bg-black hover:bg-gray-800 shadow-sm text-sm"
                 >
                   Next
-                  <ArrowRight size={16} className="ml-2" />
+                  <ArrowRight size={14} className="ml-1 sm:ml-2" />
                 </Button>
               </div>
             </div>
           </div>
 
           {/* Full-Height Editor */}
-          <div className="flex-1 overflow-y-auto px-12 py-8">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8">
             <div className="max-w-5xl mx-auto">
               <RichTextEditor
                 content={formData.content}
@@ -310,12 +303,12 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
 
       {/* STEP 2: Add Details */}
       {step === 2 && (
-        <div className="space-y-6 max-w-3xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="space-y-4 sm:space-y-6 max-w-3xl mx-auto">
+          <div className="text-center mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
               Finishing Touches
             </h2>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600">
               Add a compelling title and cover image for your blog
             </p>
           </div>
@@ -360,32 +353,34 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
                 <img
                   src={previewUrl}
                   alt="Cover preview"
-                  className="w-full h-64 object-cover rounded-lg"
+                  className="w-full h-48 sm:h-64 object-cover rounded-lg"
                 />
                 <button
                   type="button"
                   onClick={removeImage}
                   className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors"
                 >
-                  <X size={20} />
+                  <X size={18} />
                 </button>
                 <button
                   type="button"
                   onClick={() => document.getElementById('coverImageInput').click()}
-                  className="absolute bottom-2 right-2 bg-black text-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-800 transition-colors text-sm font-medium"
+                  className="absolute bottom-2 right-2 bg-black text-white px-3 sm:px-4 py-2 rounded-lg shadow-lg hover:bg-gray-800 transition-colors text-xs sm:text-sm font-medium"
                 >
                   Change Image
                 </button>
               </div>
             ) : (
-              <label htmlFor="coverImageInput" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <Upload size={40} className="text-gray-400 mb-3" />
-                  <p className="mb-2 text-sm text-gray-500">
-                    <span className="font-semibold">Click to upload</span> or
-                    drag and drop
+              <label 
+                htmlFor="coverImageInput" 
+                className="flex flex-col items-center justify-center w-full h-48 sm:h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 px-4">
+                  <Upload size={32} className="text-gray-400 mb-3" />
+                  <p className="mb-2 text-sm text-gray-500 text-center">
+                    <span className="font-semibold">Tap to upload</span> or drag and drop
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 text-center">
                     PNG, JPG, GIF, WEBP (MAX. 5MB)
                   </p>
                 </div>
@@ -404,23 +399,25 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-between items-center pt-6 border-t">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-6 border-t">
             <Button
               type="button"
               variant="outline"
               onClick={() => setStep(1)}
+              className="order-2 sm:order-1"
             >
               <ArrowLeft size={18} className="mr-2" />
               Back to Writing
             </Button>
 
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 order-1 sm:order-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleSaveDraft}
                 loading={loading}
                 disabled={loading}
+                className="w-full sm:w-auto"
               >
                 <Save size={18} className="mr-2" />
                 Save as Draft
@@ -432,6 +429,7 @@ const BlogForm = ({ blogId = null, initialData = null }) => {
                 onClick={handlePublish}
                 loading={loading}
                 disabled={loading}
+                className="w-full sm:w-auto"
               >
                 {blogId && status === "published" ? "Update" : "Publish"}
               </Button>
