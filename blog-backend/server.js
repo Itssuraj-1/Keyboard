@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 import fs from "fs";
 
 // Load environment variables
-import 'dotenv/config'
+import "dotenv/config";
 
 // Import configurations and middleware
 import connectDB from "./config/db.js";

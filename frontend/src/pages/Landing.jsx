@@ -177,7 +177,7 @@ const Landing = () => {
           {/* Main Heading */}
           <motion.h2 
             variants={itemVariants}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-center mb-6 leading-tight text-black"
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-center mb-6 leading-tight text-black"
           >
             Share Your Stories
             <br />
@@ -195,30 +195,30 @@ const Landing = () => {
             stories, and expertise with readers everywhere.
           </motion.p>
 
-          {/* CTA Buttons - ICON ALIGNMENT FIX APPLIED HERE */}
+          {/* CTA Buttons - Fixed Alignment and Responsive Sizes */}
           <motion.div 
             variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            className="flex flex-row gap-4 justify-center"
           >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 sm:flex-initial">
               <Button
                 variant="primary"
                 size="lg"
                 onClick={handleStartReading}
-                className="bg-black text-white hover:bg-gray-800 px-8 py-4 flex items-center justify-center" 
+                className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 px-4 sm:px-8 py-4 flex items-center justify-center text-xs sm:text-base whitespace-nowrap" 
               >
-                <BookOpen size={20} className="mr-2" />
+                <BookOpen size={20} className="mr-2 shrink-0" />
                 Start Reading
               </Button>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 sm:flex-initial">
               <Button
                 variant="secondary"
                 size="lg"
                 onClick={handleRegister}
-                className="bg-white text-black border-2 border-black hover:bg-gray-100 px-8 py-4 flex items-center justify-center"
+                className="w-full sm:w-auto bg-white text-black border-2 border-black hover:bg-gray-100 px-4 sm:px-8 py-4 flex items-center justify-center text-xs sm:text-base whitespace-nowrap"
               >
-                <PenTool size={20} className="mr-2" />
+                <PenTool size={20} className="mr-2 shrink-0" />
                 Start Writing
               </Button>
             </motion.div>
@@ -261,7 +261,7 @@ const Landing = () => {
         </motion.div>
       </motion.div>
 
-      {/* Features Section - SUBTLE BOX STYLING APPLIED HERE */}
+      {/* Features Section */}
       <div className="py-20 sm:py-32 relative z-10">
         <motion.div 
           className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
@@ -272,7 +272,6 @@ const Landing = () => {
         >
           <div className="grid md:grid-cols-3 gap-12">
             <motion.div 
-              // Added subtle box classes: p-8 rounded-xl border border-gray-200 shadow-sm
               className="text-center space-y-4 p-8 rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300"
               variants={featureVariants}
               whileHover={{ y: -10 }}
@@ -292,7 +291,6 @@ const Landing = () => {
             </motion.div>
 
             <motion.div 
-              // Added subtle box classes: p-8 rounded-xl border border-gray-200 shadow-sm
               className="text-center space-y-4 p-8 rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300"
               variants={featureVariants}
               whileHover={{ y: -10 }}
@@ -312,7 +310,6 @@ const Landing = () => {
             </motion.div>
 
             <motion.div 
-              // Added subtle box classes: p-8 rounded-xl border border-gray-200 shadow-sm
               className="text-center space-y-4 p-8 rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300"
               variants={featureVariants}
               whileHover={{ y: -10 }}
