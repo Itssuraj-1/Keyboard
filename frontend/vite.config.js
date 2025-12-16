@@ -6,5 +6,5 @@ import { Import } from "lucide-react";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: import.meta.env.VITE_BASE_URL || "/react-vite-deploy",
+  base: "/", 
 });
