@@ -1,4 +1,4 @@
-import { v2 as cloudinary } from 'cloudinary';
+import { v2 as cloudinary } from "cloudinary";
 
 // Configure Cloudinary
 cloudinary.config({
@@ -9,17 +9,35 @@ cloudinary.config({
 
 /**
  * Upload image to Cloudinary
- * @param {String} filePath - Path to the file
+ * @param {String|Buffer} file - File path or buffer from multer
  * @param {String} folder - Cloudinary folder name
  * @returns {Promise<Object>} - Upload result
  */
-export const uploadToCloudinary = async (filePath, folder = 'blog-covers') => {
+export const uploadToCloudinary = async (file, folder = "blog-covers") => {
   try {
-    const result = await cloudinary.uploader.upload(filePath, {
+    // If file is a buffer (memory storage), convert to base64
+    if (Buffer.isBuffer(file)) {
+      const base64 = `data:image/jpeg;base64,${file.toString("base64")}`;
+      const result = await cloudinary.uploader.upload(base64, {
+        folder,
+        resource_type: "auto",
+        transformation: [
+          { width: 1200, height: 630, crop: "fill", quality: "auto" },
+        ],
+      });
+
+      return {
+        url: result.secure_url,
+        publicId: result.public_id,
+      };
+    }
+
+    // Otherwise, assume it's a file path (local development)
+    const result = await cloudinary.uploader.upload(file, {
       folder,
-      resource_type: 'auto',
+      resource_type: "auto",
       transformation: [
-        { width: 1200, height: 630, crop: 'fill', quality: 'auto' },
+        { width: 1200, height: 630, crop: "fill", quality: "auto" },
       ],
     });
 

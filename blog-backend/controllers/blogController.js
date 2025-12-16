@@ -5,7 +5,6 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from "../utils/cloudinary.js";
-import fs from "fs";
 
 // @desc    Get all blogs (with pagination and search) - only published
 // @route   GET /api/blogs
@@ -19,16 +18,13 @@ export const getBlogs = async (req, res, next) => {
     const sortBy = req.query.sortBy || "createdAt";
     const order = req.query.order === "asc" ? 1 : -1;
 
-    // Build query - only show published blogs
     let query = { status: "published" };
     if (search) {
       query.$text = { $search: search };
     }
 
-    // Get total count
     const total = await Blog.countDocuments(query);
 
-    // Get blogs
     const blogs = await Blog.find(query)
       .populate("author", "name email avatar")
       .sort({ [sortBy]: order })
@@ -80,23 +76,20 @@ export const createBlog = async (req, res, next) => {
   try {
     const { title, content, status } = req.body;
 
-    // Validate required fields
     if (!title || !content) {
       return ApiResponse.error(res, 400, "Please provide title and content");
     }
 
-    // Validate file upload
     if (!req.file) {
       return ApiResponse.error(res, 400, "Please upload a cover image");
     }
 
-    // Upload to Cloudinary
-    const uploadResult = await uploadToCloudinary(req.file.path, "blog-covers");
+    // Upload to Cloudinary using buffer (memory storage)
+    const uploadResult = await uploadToCloudinary(
+      req.file.buffer,
+      "blog-covers"
+    );
 
-    // Delete local file after upload
-    fs.unlinkSync(req.file.path);
-
-    // Create blog with status (default to published if not provided)
     const blog = await Blog.create({
       title,
       content,
@@ -105,15 +98,10 @@ export const createBlog = async (req, res, next) => {
       status: status || "published",
     });
 
-    // Populate author details
     await blog.populate("author", "name email avatar");
 
     return ApiResponse.success(res, 201, "Blog created successfully", blog);
   } catch (error) {
-    // Clean up local file if exists
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
     next(error);
   }
 };
@@ -129,7 +117,6 @@ export const updateBlog = async (req, res, next) => {
       return ApiResponse.error(res, 404, "Blog not found");
     }
 
-    // Check if user is the author
     if (blog.author.toString() !== req.user._id.toString()) {
       return ApiResponse.error(res, 403, "Not authorized to update this blog");
     }
@@ -137,9 +124,9 @@ export const updateBlog = async (req, res, next) => {
     const { title, content, status } = req.body;
     let coverImageUrl = blog.coverImage;
 
-    // If new image uploaded, upload to Cloudinary
+    // If new image uploaded
     if (req.file) {
-      // Extract public_id from old image URL and delete
+      // Delete old image from Cloudinary
       const oldPublicId = blog.coverImage
         .split("/")
         .slice(-2)
@@ -147,18 +134,14 @@ export const updateBlog = async (req, res, next) => {
         .split(".")[0];
       await deleteFromCloudinary(oldPublicId);
 
-      // Upload new image
+      // Upload new image using buffer
       const uploadResult = await uploadToCloudinary(
-        req.file.path,
+        req.file.buffer,
         "blog-covers"
       );
       coverImageUrl = uploadResult.url;
-
-      // Delete local file
-      fs.unlinkSync(req.file.path);
     }
 
-    // Update blog
     blog.title = title || blog.title;
     blog.content = content || blog.content;
     blog.coverImage = coverImageUrl;
@@ -174,10 +157,6 @@ export const updateBlog = async (req, res, next) => {
       updatedBlog
     );
   } catch (error) {
-    // Clean up local file if exists
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
     next(error);
   }
 };
@@ -193,7 +172,6 @@ export const deleteBlog = async (req, res, next) => {
       return ApiResponse.error(res, 404, "Blog not found");
     }
 
-    // Check if user is the author
     if (blog.author.toString() !== req.user._id.toString()) {
       return ApiResponse.error(res, 403, "Not authorized to delete this blog");
     }
@@ -209,7 +187,6 @@ export const deleteBlog = async (req, res, next) => {
     // Delete all comments associated with blog
     await Comment.deleteMany({ blog: blog._id });
 
-    // Delete blog
     await blog.deleteOne();
 
     return ApiResponse.success(res, 200, "Blog deleted successfully", null);
@@ -227,7 +204,6 @@ export const getBlogsByUser = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    // Only show published blogs for public view
     const query = {
       author: req.params.userId,
       status: "published",
@@ -264,7 +240,7 @@ export const getMyBlogs = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    const status = req.query.status; // 'draft' or 'published'
+    const status = req.query.status;
 
     const query = { author: req.user._id };
     if (status) {
