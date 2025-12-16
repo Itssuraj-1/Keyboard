@@ -13,10 +13,18 @@ const BlogCard = ({ blog }) => {
     navigate(`/blog/${blog._id}`);
   };
 
-  // Truncate content to 150 characters
-  const truncateContent = (text, maxLength = 150) => {
-    if (text.length <= maxLength) return text;
-    return text.slice(0, maxLength) + "...";
+  // Strip HTML tags and truncate content
+  const truncateContent = (htmlContent, maxLength = 150) => {
+    // Create a temporary div to parse HTML
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = htmlContent;
+    
+    // Get text content without HTML tags
+    const textContent = tempDiv.textContent || tempDiv.innerText || "";
+    
+    // Truncate to maxLength
+    if (textContent.length <= maxLength) return textContent;
+    return textContent.slice(0, maxLength) + "...";
   };
 
   return (
@@ -64,7 +72,7 @@ const BlogCard = ({ blog }) => {
               {blog.title}
             </h3>
 
-            {/* Content Preview */}
+            {/* Content Preview - HTML tags stripped */}
             <p className="text-gray-600 text-sm mb-4 line-clamp-3">
               {truncateContent(blog.content)}
             </p>

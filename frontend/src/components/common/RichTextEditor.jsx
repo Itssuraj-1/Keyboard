@@ -2,6 +2,7 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import { useEffect } from "react";
 import {
   Bold,
   Italic,
@@ -43,6 +44,13 @@ const RichTextEditor = ({
     },
   });
 
+  // Update editor content when content prop changes
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
+
   if (!editor) {
     return null;
   }
@@ -61,9 +69,9 @@ const RichTextEditor = ({
   );
 
   return (
-    <div className="border-2 border-gray-200 rounded-lg overflow-hidden focus-within:border-black transition-colors">
+    <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:border-gray-300 transition-colors shadow-sm">
       {/* Toolbar */}
-      <div className="bg-white border-b-2 border-gray-200 p-2 flex flex-wrap gap-1">
+      <div className="bg-gray-50 border-b border-gray-200 p-3 flex flex-wrap gap-1">
         {/* Text Formatting */}
         <div className="flex gap-1 pr-2 border-r border-gray-200">
           <MenuButton
@@ -160,7 +168,7 @@ const RichTextEditor = ({
       </div>
 
       {/* Editor Content */}
-      <div className="bg-white p-4">
+      <div className="bg-white p-8 min-h-150">
         <EditorContent editor={editor} />
       </div>
     </div>
