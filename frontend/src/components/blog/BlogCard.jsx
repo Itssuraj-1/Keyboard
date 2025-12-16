@@ -1,10 +1,11 @@
+// frontend/src/components/blog/BlogCard.jsx
 import { Heart, MessageCircle, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatDate } from "../../utils/formatDate";
 import Card from "../common/Card";
 
 /**
- * Blog card component for displaying blog preview
+ * Responsive blog card component for displaying blog preview
  */
 const BlogCard = ({ blog }) => {
   const navigate = useNavigate();
@@ -15,23 +16,19 @@ const BlogCard = ({ blog }) => {
 
   // Strip HTML tags and truncate content
   const truncateContent = (htmlContent, maxLength = 150) => {
-    // Create a temporary div to parse HTML
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = htmlContent;
-    
-    // Get text content without HTML tags
     const textContent = tempDiv.textContent || tempDiv.innerText || "";
-    
-    // Truncate to maxLength
+
     if (textContent.length <= maxLength) return textContent;
     return textContent.slice(0, maxLength) + "...";
   };
 
   return (
     <Card hover onClick={handleClick}>
-      <div className="flex flex-col md:flex-row">
+      <div className="flex flex-col sm:flex-row">
         {/* Cover Image */}
-        <div className="md:w-1/3 h-48 md:h-auto overflow-hidden">
+        <div className="w-full sm:w-1/3 h-48 sm:h-auto overflow-hidden">
           <img
             src={blog.coverImage}
             alt={blog.title}
@@ -40,12 +37,12 @@ const BlogCard = ({ blog }) => {
         </div>
 
         {/* Content */}
-        <div className="flex-1 p-6 flex flex-col justify-between">
+        <div className="flex-1 p-4 sm:p-6 flex flex-col justify-between">
           <div>
             {/* Author Info */}
             <div className="flex items-center space-x-2 mb-3">
               {blog.author?.avatar ? (
-                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 shrink-0">
                   <img
                     src={blog.author.avatar}
                     alt={blog.author.name}
@@ -53,12 +50,12 @@ const BlogCard = ({ blog }) => {
                   />
                 </div>
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
                   <User size={16} className="text-gray-500" />
                 </div>
               )}
-              <div>
-                <p className="text-sm font-medium text-gray-900">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
                   {blog.author?.name || "Anonymous"}
                 </p>
                 <p className="text-xs text-gray-500">
@@ -68,12 +65,12 @@ const BlogCard = ({ blog }) => {
             </div>
 
             {/* Title */}
-            <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 hover:underline">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 line-clamp-2 hover:underline">
               {blog.title}
             </h3>
 
-            {/* Content Preview - HTML tags stripped */}
-            <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+            {/* Content Preview */}
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2 sm:line-clamp-3">
               {truncateContent(blog.content)}
             </p>
           </div>
