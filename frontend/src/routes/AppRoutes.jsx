@@ -10,7 +10,7 @@ import CreateBlog from "../pages/CreateBlog";
 import EditBlog from "../pages/EditBlog";
 import Analytics from "../pages/Analytics";
 import Profile from "../pages/Profile";
-import MyBlogs from "../pages/Myblogs";
+import MyBlogs from "../pages/MyBlogs";
 
 // Auth Components
 import LoginForm from "../components/auth/LoginForm";
