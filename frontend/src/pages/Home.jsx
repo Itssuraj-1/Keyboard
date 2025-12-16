@@ -1,4 +1,5 @@
 // frontend/src/pages/Home.jsx
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import BlogList from "../components/blog/BlogList";
@@ -8,10 +9,15 @@ import BlogList from "../components/blog/BlogList";
  */
 const Home = () => {
   const { isAuthenticated } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+  };
 
   if (isAuthenticated) {
     return (
-      <DashboardLayout>
+      <DashboardLayout onSearch={handleSearch}>
         <div className="max-w-5xl mx-auto">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">
@@ -21,7 +27,7 @@ const Home = () => {
               Discover stories from writers around the world
             </p>
           </div>
-          <BlogList />
+          <BlogList searchQuery={searchQuery} />
         </div>
       </DashboardLayout>
     );
@@ -47,7 +53,7 @@ const Home = () => {
             Discover stories from writers around the world
           </p>
         </div>
-        <BlogList />
+        <BlogList searchQuery={searchQuery} />
       </div>
     </div>
   );

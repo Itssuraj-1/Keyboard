@@ -4,16 +4,14 @@ import { blogsAPI } from "../../api/blogs";
 import BlogCard from "./BlogCard";
 import LoadingSpinner from "../common/LoadingSpinner";
 import Button from "../common/Button";
-import { Search } from "lucide-react";
 
 /**
  * Blog list component with search and pagination
  */
-const BlogList = () => {
+const BlogList = ({ searchQuery = "" }) => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -23,15 +21,15 @@ const BlogList = () => {
 
   useEffect(() => {
     fetchBlogs();
-  }, [pagination.page]);
+  }, [pagination.page, searchQuery]);
 
-  const fetchBlogs = async (search = searchTerm) => {
+  const fetchBlogs = async () => {
     try {
       setLoading(true);
       const response = await blogsAPI.getBlogs({
         page: pagination.page,
         limit: pagination.limit,
-        search,
+        search: searchQuery,
       });
 
       setBlogs(response.data.blogs);
@@ -42,12 +40,6 @@ const BlogList = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setPagination((prev) => ({ ...prev, page: 1 }));
-    fetchBlogs(searchTerm);
   };
 
   const handlePageChange = (newPage) => {
@@ -61,26 +53,6 @@ const BlogList = () => {
 
   return (
     <div className="space-y-6">
-      {/* Search Bar */}
-      <form onSubmit={handleSearch} className="flex gap-2">
-        <div className="relative flex-1">
-          <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-            size={20}
-          />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search blogs..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-          />
-        </div>
-        <Button type="submit" variant="primary">
-          Search
-        </Button>
-      </form>
-
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
@@ -88,8 +60,24 @@ const BlogList = () => {
         </div>
       )}
 
+      {/* Search Results Info */}
+      {searchQuery && (
+        <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-md">
+          <p>
+            {pagination.total === 0 ? (
+              <>No results found for "{searchQuery}"</>
+            ) : (
+              <>
+                Found {pagination.total} result
+                {pagination.total !== 1 ? "s" : ""} for "{searchQuery}"
+              </>
+            )}
+          </p>
+        </div>
+      )}
+
       {/* Blog List */}
-      {blogs.length === 0 ? (
+      {blogs.length === 0 && !searchQuery ? (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">No blogs found</p>
         </div>
