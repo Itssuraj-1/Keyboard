@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
-
+import path from "path";
+import { fileURLToPath } from "url";
 import "dotenv/config";
 
 // DB & middleware
@@ -11,6 +12,10 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
 
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Connect DB
 connectDB();
 
@@ -20,22 +25,16 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// CORS - Allow all origins in development
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow Postman / server-to-server
-      if (!origin) return callback(null, true);
-
-      // Allow all temporarily OR exact frontend URL later
-      if (process.env.CLIENT_URL === "*" || origin === process.env.CLIENT_URL) {
-        return callback(null, true);
-      }
-
-      callback(new Error("Not allowed by CORS"));
-    },
+    origin: true,
     credentials: true,
   })
 );
+
+// Serve static files from uploads directory
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -55,7 +54,7 @@ app.get("/api/health", (req, res) => {
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "Blog Management API",
+    message: "Haerin Blog API",
     version: "1.0.0",
     routes: {
       auth: "/api/auth",
@@ -69,8 +68,8 @@ app.get("/", (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-// start server
-const PORT = process.env.PORT || 5000;
+// Start server
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(🚀 Server running on http://localhost:${PORT});
 });
